@@ -97,7 +97,9 @@
 -- CREATE (Illumination215:Illumination{name:'office215', value:106, executionId:'1671183763', isProcessed:false})
 -- CREATE (Illumination207:Illumination{name:'office207', value:106, executionId:'1671183763', isProcessed:false})
 
--- Turn off lights by creating a command in the DL to be readed by the PTs.
+-- CREATE (Command5:Command{commandOperation:'LightToggle', twinClass:'Light', twinId:'colorLight1', executionId:'1671183763', isProcessed:false})
+-- CREATE (Command6:Command{commandOperation:'LightToggle', twinClass:'Light', twinId:'colorLight2', executionId:'1671183763', isProcessed:false})
+-- CREATE (Command7:Command{commandOperation:'LightToggle', twinClass:'Light', twinId:'colorLight3', executionId:'1671183763', isProcessed:false})
 
 -- -------------------------------------------------------------------------------
 -- STEP 5                                                                       --
