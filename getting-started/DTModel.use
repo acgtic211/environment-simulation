@@ -1,0 +1,586 @@
+model ThingSimulator
+
+enum Security {nosec, combo, basic, digest, bearer, psk, oauth2, apike}
+enum Alert {select, lselect}
+enum Colormode {hue, sat, bri, xy}
+
+abstract class ThingDescriptionInformation
+    attributes
+        thing_context : String
+        thing_type : String
+end
+
+abstract class ThingInformation
+    attributes
+        id : String
+        title : String
+        security : Security
+        description : String
+        created : Integer
+        modified : Integer
+        support : String
+        base : String
+        executionId: String    init : 'test'
+end
+
+-- ----------------------------------------------------------------------------
+-- LIGHT                                                                       --
+-- ----------------------------------------------------------------------------
+
+class LightDescription < ThingDescriptionInformation
+    attributes
+        minimumBri : Integer
+        maximumBri : Integer
+        minimumHue : Integer
+        maximumHue : Integer
+        defaultOn : Boolean
+        minimumCt : Integer
+        maximumCt : Integer
+        minimumSat : Integer
+        maximumSat : Integer
+        minimumXy : Real
+        maximumXy: Real
+end
+
+class Light < ActiveObject, ThingInformation
+    attributes
+    operations
+        action()
+            begin
+                declare lightState : LightState;
+                lightState := new LightState();
+                -----------------------------ACTUALIZO SENSORES------------------------------
+                lightState.timestamp := self.clock.now;
+                lightState.executionId := self.executionId;
+                if self.timestamps->size() > 0 then
+                    lightState.on := self.timestamps->asSequence()->sortedBy(st | st.timestamp)->last().on;
+                    lightState.bri := self.timestamps->asSequence()->sortedBy(st | st.timestamp)->last().bri;
+                    lightState.sat := self.timestamps->asSequence()->sortedBy(st | st.timestamp)->last().sat;
+                end;
+                lightState.illumination := Illumination.allInstances()->asSequence()->first().value;
+                lightState.hue := self.thingDescription.minimumHue + (self.thingDescription.maximumHue-self.thingDescription.minimumHue).rand().round();
+                lightState.ct := self.thingDescription.minimumCt + (self.thingDescription.maximumCt-self.thingDescription.minimumCt).rand().round();
+                lightState.xy := Tuple{x : self.thingDescription.minimumXy + (self.thingDescription.maximumXy-self.thingDescription.minimumXy).rand(), y : self.thingDescription.minimumXy + (self.thingDescription.maximumXy-self.thingDescription.minimumXy).rand()};
+                ----------------------REALIZO OPERACIONES INSTANTÁNEAS----------------------
+                for op in LightToggle.allInstances()->select(op : LightToggle | op.deviceAssociated = self) do
+                    lightState.on := 1.rand().round() = 0;
+                    destroy op;
+                end;
+                for op in LightBri.allInstances()->select(op : LightBri | op.deviceAssociated = self) do
+                    lightState.bri := op.value;
+                    destroy op;
+                end;
+                ------------------------REALIZO OPERACIONES GRADUALES-----------------------
+                for op in LightAlert.allInstances()->select(op : LightAlert | op.deviceAssociated = self) do
+                    if op.initializing then
+                        lightState.bri := 0;
+                        lightState.sat := 0;
+                        lightState.on := true;
+                        op.initializing := false;
+                        op.originalState := self.timestamps->asSequence()->sortedBy(st | st.timestamp)->last();
+                    else
+                        if op.changing then
+                            lightState.bri := lightState.bri + 130;
+                            lightState.sat := lightState.sat + 130;
+                            if(lightState.bri >= self.thingDescription.maximumBri and lightState.sat >= self.thingDescription.maximumSat) then
+                                lightState.bri := self.thingDescription.maximumBri;
+                                lightState.sat := self.thingDescription.maximumSat;
+                                op.changing := false;
+                            end;
+                        else
+                            lightState.bri := lightState.bri - 130;
+                            lightState.sat := lightState.sat - 130;
+                            if(lightState.bri <= self.thingDescription.minimumBri and lightState.sat <= self.thingDescription.minimumSat) then
+                                lightState.bri := self.thingDescription.minimumBri;
+                                lightState.sat := self.thingDescription.minimumSat;
+                                lightState.on := false;
+                                if op.originalState <> null and op.destroying then
+                                    lightState.bri := op.originalState.bri;
+                                    lightState.sat := op.originalState.sat;
+                                    lightState.on := op.originalState.on;
+                                    destroy op;
+                                end;
+                                if op <> null then
+                                    op.destroying := true;
+                                    if op.originalState = null then
+                                        destroy op;
+                                    end;
+                                end;
+                            end;
+                        end;
+                    end;
+                end;
+                ----------------------------------------------------------------------------
+                insert(self, lightState) into LightValues;
+            end
+end
+
+class LightState < TimedElement
+    attributes
+        bri : Integer   init : 0
+        colormode : String init : ''
+        hue : Integer
+        on : Boolean    init : false
+        alert  : String init : ''
+        ct : Integer
+        sat : Integer   init : 0
+        xy : Tuple(x: Real, y: Real)
+        illumination : Real init : 200
+end
+
+
+association LightThingDescription between
+    LightDescription[1] role thingDescription
+    Light[*] role things
+end
+
+association LightValues between
+    Light[1] role associatedThing
+    LightState[*] role timestamps
+end
+
+
+
+-- ----------------------------------------------------------------------------
+-- MOVEMENT                                                                  --
+-- ----------------------------------------------------------------------------
+
+class MovementSensorDescription < ThingDescriptionInformation
+    attributes
+        defaultMovement : Boolean
+        detectionAngle : Real
+        detectionRange : Real -- In Metres
+end
+
+class MovementSensor < ActiveObject, ThingInformation
+    attributes
+        position : Tuple(x: Real, y: Real, z: Real)
+        viewDirection : Real --Degrees of the device direction. 0º is looking in positive x axis (+x,0,0) : (x,y,z)
+    operations
+        action()
+            begin
+                declare movementState : MovementSensorState, newMovement : Boolean;
+                newMovement := false;
+                movementState := new MovementSensorState();
+                movementState.timestamp := self.clock.now;
+                movementState.executionId := self.executionId;
+
+
+                ---Prueba Deteccion---
+                for mov in MovingObject.allInstances() do
+                    if newMovement = false then
+                        newMovement := self._detectCollision(mov);
+                    end;
+                end;
+
+                movementState.movement := newMovement;
+                insert(self, movementState) into MovementValues;
+            end
+        _detectCollision(mov: MovingObject) : Boolean
+            begin
+                    declare directionOfView : Tuple(x: Real, y: Real), pointA : Tuple(x: Real, y: Real), pointB : Tuple(x: Real, y: Real), pointC : Tuple(x: Real, y: Real), AP : Real, BP : Real, CP : Real, movA : Tuple(x: Real, y: Real), movB : Tuple(x: Real, y: Real), movC : Tuple(x: Real, y: Real), movD : Tuple(x: Real, y: Real), intersectionResult : Boolean;
+
+                    result := false;
+
+                    directionOfView := Tuple{x : self.thingDescription.detectionRange*(self.viewDirection).toRadians().sin, y : self.thingDescription.detectionRange*(self.viewDirection).toRadians().cos};
+                    directionOfView := Tuple{x : directionOfView.x.precision(2), y : directionOfView.y.precision(2)};
+                    pointA := Tuple{x : directionOfView.x*(self.thingDescription.detectionAngle/2).toRadians().cos+directionOfView.y*(self.thingDescription.detectionAngle/2).toRadians().sin, y : -directionOfView.x*(self.thingDescription.detectionAngle/2).toRadians().sin+directionOfView.y*(self.thingDescription.detectionAngle/2).toRadians().cos};
+                    pointB := Tuple{x : directionOfView.x*(-self.thingDescription.detectionAngle/2).toRadians().cos+directionOfView.y*(-self.thingDescription.detectionAngle/2).toRadians().sin, y : -directionOfView.x*(-self.thingDescription.detectionAngle/2).toRadians().sin+directionOfView.y*(-self.thingDescription.detectionAngle/2).toRadians().cos};
+                    pointC := Tuple{x : self.position.x, y : self.position.y};
+                    pointA := Tuple{x : (pointA.x + self.position.x).precision(2), y : (pointA.y + self.position.y).precision(2)};
+                    pointB := Tuple{x : (pointB.x + self.position.x).precision(2), y : (pointB.y + self.position.y).precision(2)};
+
+                    movA := Tuple{x : mov.originPoint.x, y : mov.originPoint.y};
+                    movB := Tuple{x : mov.originPoint.x+mov.length, y : mov.originPoint.y};
+                    movC := Tuple{x : mov.originPoint.x+mov.length, y : mov.originPoint.y+mov.length};
+                    movD := Tuple{x : mov.originPoint.x, y : mov.originPoint.y+mov.length};
+
+
+                    if self._doIntersection(movA, movB, pointA, pointB) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movA, movB, pointA, pointC) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movA, movB, pointB, pointC) then
+                        result := true;
+                    end;
+
+
+
+                    if result <> true and self._doIntersection(movA, movD, pointA, pointB) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movA, movD, pointA, pointC) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movA, movD, pointB, pointC) then
+                        result := true;
+                    end;
+
+
+
+                    if result <> true and self._doIntersection(movD, movC, pointA, pointB) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movD, movC, pointA, pointC) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movD, movC, pointB, pointC) then
+                        result := true;
+                    end;
+
+
+
+                    if result <> true and self._doIntersection(movB, movC, pointA, pointB) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movB, movC, pointA, pointC) then
+                        result := true;
+                    end;
+
+                    if result <> true and self._doIntersection(movB, movC, pointB, pointC) then
+                        result := true;
+                    end;
+
+                    if result <> true then
+                        AP := (mov.originPoint.x - pointB.x) * (pointA.y - pointB.y) - (pointA.x - pointB.x) * (mov.originPoint.y - pointB.y);
+                        BP := (mov.originPoint.x - pointC.x) * (pointB.y - pointC.y) - (pointB.x - pointC.x) * (mov.originPoint.y - pointC.y);
+                        CP := (mov.originPoint.x - pointA.x) * (pointC.y - pointA.y) - (pointC.x - pointA.x) * (mov.originPoint.y - pointA.y);
+                        if (AP>=0 and BP>=0 and CP>=0) or (AP<=0 and BP<=0 and CP<=0) then
+                            result := true;
+                        end;
+                    end;
+            end
+        _onSegment(p : Tuple(x: Real, y: Real), q : Tuple(x: Real, y: Real), r : Tuple(x: Real, y: Real)) : Boolean
+            = q.x <= p.x.max(r.x) and q.x >= p.x.min(r.x) and q.y <= p.y.max(r.y) and q.y >= p.y.min(r.y)
+
+        _orientation(p : Tuple(x: Real, y: Real), q : Tuple(x: Real, y: Real), r : Tuple(x: Real, y: Real)) : Integer
+            = let value : Integer = ((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)).precision(0).ceil() in
+            if value = 0 then 
+                0 --collinear
+            else
+                if value > 0 then
+                    1 --clock
+                else
+                    2 --counterclock wise
+                endif
+            endif
+        _doIntersection(p1 : Tuple(x: Real, y: Real), q1 : Tuple(x: Real, y: Real), p2 : Tuple(x: Real, y: Real), q2 : Tuple(x: Real, y: Real)) : Boolean
+            = let o1 : Integer = self._orientation(p1, q1, p2) in
+              let o2 : Integer = self._orientation(p1, q1, q2) in
+              let o3 : Integer = self._orientation(p2, q2, p1) in
+              let o4 : Integer = self._orientation(p2, q2, q1) in
+              (o1 <> o2 and o3 <> o4) or (o1 = 0 and self._onSegment(p1, p2, q1)) or (o2 = 0 and self._onSegment(p1, q2, q1)) or (o3 = 0 and self._onSegment(p2, p1, q2)) or (o4 = 0  and self._onSegment(p2, q1, q2))
+end
+
+class MovementSensorState < TimedElement
+    attributes
+        movement : Boolean
+end
+
+
+association MovementThingDescription between
+    MovementSensorDescription[1] role thingDescription
+    MovementSensor[*] role things
+end
+
+association MovementValues between
+    MovementSensor[1] role associatedThing
+    MovementSensorState[*] role timestamps
+end
+
+
+
+-- ----------------------------------------------------------------------------
+-- BLIND                                                                  --
+-- ----------------------------------------------------------------------------
+class BlindDescription < ThingDescriptionInformation
+    attributes
+        minimumOpenPercent : Integer
+        maximumOpenPercent : Integer
+end
+
+class Blind < ActiveObject, ThingInformation
+    attributes
+    operations
+        action()
+            begin
+                declare blindState : BlindState;
+                blindState := new BlindState();
+                -----------------------------ACTUALIZO SENSORES------------------------------
+                blindState.timestamp := self.clock.now;
+                blindState.executionId := self.executionId;
+                if self.timestamps->size() > 0 then
+                    blindState.openPercent := self.timestamps->asSequence()->sortedBy(st | st.timestamp)->last().openPercent;
+                end;
+                ----------------------REALIZO OPERACIONES INSTANTÁNEAS----------------------
+                for op in BlindStop.allInstances()->select(op : BlindStop | op.deviceAssociated = self) do
+                    for stopOp in BlindOpen.allInstances()->select(stopOp : BlindOpen | stopOp.deviceAssociated = self) do
+                        destroy stopOp;
+                    end;
+                    for stopOp in BlindClose.allInstances()->select(stopOp : BlindClose | stopOp.deviceAssociated = self) do
+                        destroy stopOp;
+                    end;
+                    destroy op;
+                end;
+                ------------------------REALIZO OPERACIONES GRADUALES-----------------------
+                for op in BlindOpen.allInstances()->select(op : BlindOpen | op.deviceAssociated = self) do
+                        if blindState.openPercent = 100 then
+                            destroy op;
+                        else
+                            destroy BlindClose.allInstances()->select(destrOp : BlindClose | destrOp.deviceAssociated = self);
+                            blindState.openPercent := blindState.openPercent + 10;
+                        end;
+                end;
+                for op in BlindClose.allInstances()->select(op : BlindClose | op.deviceAssociated = self) do
+                        if blindState.openPercent = 0 then
+                            destroy op;
+                        else
+                            destroy BlindOpen.allInstances()->select(destrOp : BlindOpen | destrOp.deviceAssociated = self);
+                            blindState.openPercent := blindState.openPercent - 10;                        
+                        end;
+                end;
+                ----------------------------------------------------------------------------
+                insert(self, blindState) into BlindValues;
+            end
+end
+
+class BlindState < TimedElement
+    attributes
+        openPercent : Integer   init : 0
+end
+
+
+association BlindThingDescription between
+    BlindDescription[1] role thingDescription
+    Blind[*] role things
+end
+
+association BlindValues between
+    Blind[1] role associatedThing
+    BlindState[*] role timestamps
+end
+
+-- ----------------------------------------------------------------------------
+-- MOTION SENSOR TEMPERATURE                                                 --
+-- ----------------------------------------------------------------------------
+
+-- ----------------------------------------------------------------------------
+-- OPERATIONS                                                                --
+-- ----------------------------------------------------------------------------
+
+class Command < TimedElement
+end
+
+-- ----------------------------------------------------------------------------
+-- Light Operations                                                          --
+-- ----------------------------------------------------------------------------
+
+class LightToggle < Command
+    attributes
+        deviceAssociated : Light
+end
+
+class LightBri < Command
+    attributes
+        deviceAssociated : Light
+        value : Integer
+end
+
+class LightAlert < Command
+    attributes
+        deviceAssociated : Light
+        initializing : Boolean  init : true
+        changing : Boolean  init : true
+        originalState : LightState
+        destroying : Boolean init : false
+end
+
+
+-- ----------------------------------------------------------------------------
+-- Blind Operations                                                          --
+-- ----------------------------------------------------------------------------
+
+class BlindOpen < Command
+    attributes
+        deviceAssociated : Blind
+end
+
+class BlindClose < Command
+    attributes
+        deviceAssociated : Blind
+end
+
+class BlindStop < Command
+    attributes
+        deviceAssociated : Blind
+end
+
+-- ----------------------------------------------------------------------------
+-- ENVIRONMENT                                                               --
+-- ----------------------------------------------------------------------------
+
+class MovingObject < SquareFigure, TimedElement
+    attributes
+end
+
+class SquareFigure
+    attributes
+        originPoint : Tuple(x: Real, y: Real, z: Real)
+        length : Real
+end
+
+class Illumination < TimedElement
+    attributes
+        value : Real
+end
+
+class CommandList
+    operations
+        toggle(deviceAssociated : Light)
+            begin
+                declare toggleOperation : LightToggle;
+                toggleOperation := new LightToggle();
+                toggleOperation.timestamp := deviceAssociated.clock.now;
+                toggleOperation.executionId := deviceAssociated.executionId;
+                toggleOperation.isProcessed := true;
+                toggleOperation.whenProcessed := deviceAssociated.clock.now;
+                toggleOperation.deviceAssociated := deviceAssociated;
+            end
+        bri(value : Integer, deviceAssociated : Light)
+            begin
+                declare briOperation : LightBri;
+                briOperation := new LightBri();
+                briOperation.timestamp := deviceAssociated.clock.now;
+                briOperation.executionId := deviceAssociated.executionId;
+                briOperation.isProcessed := true;
+                briOperation.whenProcessed := deviceAssociated.clock.now;
+                briOperation.deviceAssociated := deviceAssociated;
+                briOperation.value := value;
+            end
+        alert(deviceAssociated : Light)
+            begin
+                declare alertOperation : LightAlert;
+                alertOperation := new LightAlert();
+                alertOperation.timestamp := deviceAssociated.clock.now;
+                alertOperation.executionId := deviceAssociated.executionId;
+                alertOperation.isProcessed := true;
+                alertOperation.whenProcessed := deviceAssociated.clock.now;
+                alertOperation.deviceAssociated := deviceAssociated;
+            end
+        open(deviceAssociated : Blind)
+            begin
+                declare openOperation : BlindOpen;
+                openOperation := new BlindOpen();
+                openOperation.timestamp := deviceAssociated.clock.now;
+                openOperation.executionId := deviceAssociated.executionId;
+                openOperation.isProcessed := true;
+                openOperation.whenProcessed := deviceAssociated.clock.now;
+                openOperation.deviceAssociated := deviceAssociated;
+            end
+        close(deviceAssociated : Blind)
+            begin
+                declare closeOperation : BlindClose;
+                closeOperation := new BlindClose();
+                closeOperation.timestamp := deviceAssociated.clock.now;
+                closeOperation.executionId := deviceAssociated.executionId;
+                closeOperation.isProcessed := true;
+                closeOperation.whenProcessed := deviceAssociated.clock.now;
+                closeOperation.deviceAssociated := deviceAssociated;
+            end
+        stop(deviceAssociated : Blind)
+            begin
+                declare stopOperation : BlindStop;
+                stopOperation := new BlindStop();
+                stopOperation.timestamp := deviceAssociated.clock.now;
+                stopOperation.executionId := deviceAssociated.executionId;
+                stopOperation.isProcessed := true;
+                stopOperation.whenProcessed := deviceAssociated.clock.now;
+                stopOperation.deviceAssociated := deviceAssociated;
+            end
+end
+
+-- ----------------------------------------------------------------------------
+-- Time Management                                                           --
+-- ----------------------------------------------------------------------------
+
+
+-- 
+class Clock
+
+    attributes
+
+        -- current time, in milliseconds (POSIX format)
+        now : Integer
+            init: 0 
+
+        -- resolution, in milliseconds
+        resolution: Integer
+            init: 20
+
+    operations
+
+        -- advance time by one tick
+        tick()
+        begin
+            --declare snapshot: OutputThingInstanceSnapshot;
+            self.now := self.now + self.resolution;
+            for o in self.ao do
+                o.action();
+                --snapshot := new OutputThingInstanceSnapshot();
+                --snapshot.init(o.oclAsType(ThingInstance), self.now);
+            end;
+        end
+        post: self.now = self.now@pre + self.resolution
+
+        -- advance time by "n" ticks
+        run(n : Integer)
+        begin
+            if n > 0 then
+                for i in Sequence{1..n} do
+                    self.tick()
+                end
+            end
+        end
+        pre: n >= 0
+        post: self.now = self.now@pre + (n * self.resolution)
+
+end
+
+
+-- Class for objects that are affected by time passage
+abstract class ActiveObject
+
+    -- action that will happen after each tick
+    -- to be overridden in each subclass
+    operations
+        action() begin end
+
+end
+
+abstract class TimedElement
+    attributes
+        timestamp: Integer
+        executionId: String    init : 'test'
+        isProcessed: Boolean    init: false
+        whenProcessed: Integer
+end
+
+association Time between
+    Clock[1] role clock
+    ActiveObject[*] role ao ordered
+end
+
+
+constraints
+    context Clock inv OnlyOneClock: 
+        Clock.allInstances->size() = 1
+

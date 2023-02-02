@@ -1,0 +1,134 @@
+reset
+
+-- ----------------------------------------------------------------------------
+-- Initial State                                                             --
+-- ----------------------------------------------------------------------------
+
+!new LightDescription('hueLight');
+!hueLight.thing_context := 'https://www.w3.org/2019/wot/td/v1';
+!hueLight.thing_type := 'HUE Light Philips';
+!hueLight.minimumBri := 0;
+!hueLight.maximumBri := 254;
+!hueLight.minimumHue := 0;
+!hueLight.maximumHue := 65500;
+!hueLight.defaultOn := false;
+!hueLight.minimumCt := 154;
+!hueLight.maximumCt := 500;
+!hueLight.minimumSat := 0;
+!hueLight.maximumSat := 254;
+!hueLight.minimumXy := 0;
+!hueLight.maximumXy := 1;
+
+-- ----------------------------------------------------------------------------
+-- Light Instance 1                                                          --
+-- ----------------------------------------------------------------------------
+
+!new Light('colorLight1');
+!colorLight1.id := 'acg:lab:light/1';
+!colorLight1.title := 'colorLight1';
+!colorLight1.security := Security::basic;
+!colorLight1.description := 'Light bulb at office 2.15'
+!colorLight1.created := 1668761733
+!colorLight1.modified := 1668761733
+!colorLight1.support := 'noemail@noreply.com'
+!colorLight1.base := 'example.colorLight1.com'
+
+!insert(hueLight, colorLight1) into LightThingDescription;
+
+!new Clock('clock');
+!insert(clock, colorLight1) into Time;
+
+-- ----------------------------------------------------------------------------
+-- Light Instance 2                                                          --
+-- ----------------------------------------------------------------------------
+
+!new Light('colorLight2');
+!colorLight2.id := 'acg:lab:light/2';
+!colorLight2.title := 'colorLight2';
+!colorLight2.security := Security::basic;
+!colorLight2.description := 'Light bulb at office 2.07'
+!colorLight2.created := 1669018859
+!colorLight2.modified := 1669018859
+!colorLight2.support := 'noemail@noreply.com'
+!colorLight2.base := 'example.colorLight2.com'
+
+!insert(hueLight, colorLight2) into LightThingDescription;
+!insert(clock, colorLight2) into Time;
+
+-- ----------------------------------------------------------------------------
+-- Light Instance 3                                                          --
+-- ----------------------------------------------------------------------------
+
+!new Light('colorLight3');
+!colorLight3.id := 'acg:lab:light/3';
+!colorLight3.title := 'colorLight3';
+!colorLight3.security := Security::basic;
+!colorLight3.description := 'Light bulb at office 2.14'
+!colorLight3.created := 1669019114
+!colorLight3.modified := 1669019114
+!colorLight3.support := 'noemail@noreply.com'
+!colorLight3.base := 'example.colorLight3.com'
+
+!insert(hueLight, colorLight3) into LightThingDescription;
+!insert(clock, colorLight3) into Time;
+
+-- ----------------------------------------------------------------------------
+-- Movement Sensor Thing                                                     --
+-- ----------------------------------------------------------------------------
+!new MovementSensorDescription('sensorMovBosch');
+!sensorMovBosch.thing_context := 'https://www.w3.org/2019/wot/td/v1';
+!sensorMovBosch.thing_type := 'Bosch Movement Sensor';
+!sensorMovBosch.defaultMovement := false;
+!sensorMovBosch.detectionAngle := 90;
+!sensorMovBosch.detectionRange := 12;
+
+!new MovementSensor('movementSensor1');
+!movementSensor1.id := 'acg:lab:movement/1';
+!movementSensor1.title := 'movementSensor1';
+!movementSensor1.security := Security::nosec;
+!movementSensor1.description := 'Movement sensor at office 2.15'
+!movementSensor1.created := 1668761733
+!movementSensor1.modified := 1668761733
+!movementSensor1.support := 'noemail@noreply.com'
+!movementSensor1.base := 'example.movementSensor1.com'
+!movementSensor1.position := Tuple{x : 6.5, y : 0.5, z : 2};
+!movementSensor1.viewDirection := 0;
+
+!insert(sensorMovBosch, movementSensor1) into MovementThingDescription;
+
+!insert(clock, movementSensor1) into Time;
+
+
+-- ----------------------------------------------------------------------------
+-- Blind Thing                                                               --
+-- ----------------------------------------------------------------------------
+!new BlindDescription('ikeaBlind');
+!ikeaBlind.thing_context := 'https://www.w3.org/2019/wot/td/v1';
+!ikeaBlind.thing_type := 'Ikea Blind';
+!ikeaBlind.minimumOpenPercent := 0;
+!ikeaBlind.maximumOpenPercent := 100;
+
+!new Blind('blind1');
+!blind1.id := 'acg:lab:blind/1';
+!blind1.title := 'blind1';
+!blind1.security := Security::bearer;
+!blind1.description := 'Blind at office 2.07'
+!blind1.created := 1669030846
+!blind1.modified := 1669030846
+!blind1.support := 'noemail@noreply.com'
+!blind1.base := 'example.blind1.com'
+
+!insert(ikeaBlind, blind1) into BlindThingDescription;
+
+!insert(clock, blind1) into Time;
+
+
+-- ----------------------------------------------------------------------------
+-- Environment                                                               --
+-- ----------------------------------------------------------------------------
+
+!new Illumination('office215')
+!office215.value := 5
+
+!new Illumination('office207')
+!office207.value := 5

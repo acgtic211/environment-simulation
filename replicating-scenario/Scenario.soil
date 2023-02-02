@@ -1,0 +1,213 @@
+-- -------------------------------------------------------------------------------
+-- STEP 1                                                                       --
+-- Execute the clock.tick command 900 times to simulate from 8:30:00 to 8:45:00 --
+-- -------------------------------------------------------------------------------
+
+!clock.tick()
+
+
+-- -------------------------------------------------------------------------------
+-- STEP 2                                                                       --
+-- Worker1 enters the office at 8:45:10                                         --
+-- -------------------------------------------------------------------------------
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+
+-- CREATE (Worker1:MovingObject{name:'worker1', x:7, y:4.2, z:0, executionId:'1671183763', isProcessed:false, length:0.2})
+
+-- CREATE (Command1:Command{commandOperation:'LightToggle', twinClass:'Light', twinId:'colorLight1', executionId:'1671183763', isProcessed:false})
+-- CREATE (Command2:Command{commandOperation:'LightToggle', twinClass:'Light', twinId:'colorLight2', executionId:'1671183763', isProcessed:false})
+-- CREATE (Command3:Command{commandOperation:'LightToggle', twinClass:'Light', twinId:'colorLight3', executionId:'1671183763', isProcessed:false})
+
+
+-- -------------------------------------------------------------------------------
+-- STEP 3                                                                       --
+-- Worker1 sits at the desk at 8:45:18                                          --
+-- -------------------------------------------------------------------------------
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+
+-- CREATE (Worker1:MovingObject{name:'worker1', x:2.3, y:1, z:0, executionId:'1671183763', isProcessed:false, length:0.2})
+
+
+-- -------------------------------------------------------------------------------
+-- STEP 4                                                                       --
+-- Worker1 opens up the blind at 8:46:03                                        --
+-- -------------------------------------------------------------------------------
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+
+-- CREATE (Illumination215:Illumination{name:'office215', value:106, executionId:'1671183763', isProcessed:false})
+-- CREATE (Illumination207:Illumination{name:'office207', value:106, executionId:'1671183763', isProcessed:false})
+
+-- Turn off lights by creating a command in the DL to be readed by the PTs.
+
+-- -------------------------------------------------------------------------------
+-- STEP 5                                                                       --
+-- Execute the clock.tick command 139 times to simulate from 8:46:03 to 8:48:22 --
+-- -------------------------------------------------------------------------------
+
+!clock.tick()
+
+-- -------------------------------------------------------------------------------
+-- Worker2 enters the office 2.07 at 8:48:22                                    --
+-- (no modeled because there is no movement sensor on office 2.07)              --
+-- -------------------------------------------------------------------------------
+
+-- -------------------------------------------------------------------------------
+-- STEP 6                                                                       --
+-- Worker2 opens the room's blind at 8:48:31                                    --
+-- -------------------------------------------------------------------------------
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+
+-- CREATE (Command4:Command{commandOperation:'BlindOpen', twinClass:'Blind', twinId:'blind1', executionId:'1671183763', isProcessed:false})
+
+
+-- -------------------------------------------------------------------------------
+-- STEP 7                                                                       --
+-- End of the execution at 8:48:50                                              --
+-- -------------------------------------------------------------------------------
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
+!clock.tick()
