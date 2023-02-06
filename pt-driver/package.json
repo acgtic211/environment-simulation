@@ -1,0 +1,19 @@
+{
+  "name": "node-api-postgres",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "node ./bin/www"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "neo4j-driver": "^5.5.0",
+    "pg": "^8.7.3"
+  }
+}
