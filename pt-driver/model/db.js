@@ -1,17 +1,9 @@
 const neo4j = require('neo4j-driver');
 
-/*const driver = neo4j.driver(
-  "bolt://<host>:<bolt_port>",
+ /*const driver = neo4j.driver(
+  "neo4j://<host>:<port>",
   neo4j.auth.basic("<username>", "<password>")
 );*/
-
-const driver = neo4j.driver(
-   "neo4j://localhost",
-   neo4j.auth.basic("neo4j", "123456")
- );
-
-//Recuerda reemplazar <host>, <bolt_port>, <username> y <password> con tus valores correspondientes.
-
 
 
 const createCommand = (request, response) => {

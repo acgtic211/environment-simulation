@@ -3,7 +3,7 @@ package digital.twin;
 import java.util.*;
 
 /**
- * @author Daniel Pérez - University of Málaga
+ * @author -
  * Represents a specification of the attributes to store in the data lake. Each attribute has a type
  * and a fixed multiplicity.
  */

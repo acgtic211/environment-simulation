@@ -4,7 +4,7 @@ import org.neo4j.driver.Driver;
 import utils.DTLogger;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * Class for a thread that generates ("publishes") events.
  */
 public abstract class Service implements Runnable {

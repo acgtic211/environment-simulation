@@ -7,7 +7,7 @@ import services.Service;
 import static org.neo4j.driver.Values.parameters;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * OutputManager that retrieves all Command instances and serializes them for storage in the data lake.
  */
 public class CommandResultManager extends OutputManager {

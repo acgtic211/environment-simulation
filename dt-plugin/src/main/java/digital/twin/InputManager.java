@@ -16,7 +16,7 @@ import java.util.Objects;
 import static org.neo4j.driver.Values.parameters;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * Class that retrieves all objects from a data lake and converts them to USE objects.
  */
 public abstract class InputManager {

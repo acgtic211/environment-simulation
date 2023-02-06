@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author Daniel Pérez - University of Málaga
+ * @author -
  * A collection of utility methods for USE model manipulation.
  */
 @SuppressWarnings("unused")

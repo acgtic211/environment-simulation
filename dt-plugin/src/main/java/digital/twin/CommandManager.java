@@ -8,7 +8,7 @@ import services.Service;
 import java.util.Objects;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * InputManager that retrieves all Commands in the data lake and converts them to USE objects.
  */
 public class CommandManager extends InputManager {

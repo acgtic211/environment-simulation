@@ -6,7 +6,7 @@ import org.tzi.use.uml.sys.MObjectState;
 import services.Service;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * OutputManager that retrieves all OutputSnapshot instances and serializes them for storage in the data lake.
  */
 public class OutputSnapshotsManager extends OutputManager {

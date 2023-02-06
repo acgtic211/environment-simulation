@@ -9,7 +9,7 @@ import plugin.DriverConfig;
 import utils.DTLogger;
 
 /**
- * @author Daniel Pérez - University of Málaga
+ * @author -
  * Class for a thread that generates ("publishes") events whenever the current timestamp
  * of the Digital Twin, according to the Data Lake, is greater than the USE model's timestamp.
  */

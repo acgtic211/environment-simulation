@@ -9,7 +9,7 @@ import utils.UseFacade;
 import java.util.Objects;
 
 /**
- * @author Daniel Pérez - University of Málaga
+ * @author -
  * A collection of utility methods specifically to manipulate the digital twin USE model.
  */
 public class DTUseFacade extends UseFacade {

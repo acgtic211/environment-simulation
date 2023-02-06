@@ -3,7 +3,7 @@ package utils;
 import java.io.PrintStream;
 
 /**
- * @author Daniel Pérez - University of Málaga
+ * @author -
  * A collection of utility methods for printing text to the console.
  */
 @SuppressWarnings("unused")

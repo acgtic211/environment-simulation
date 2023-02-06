@@ -14,7 +14,7 @@ import utils.DTLogger;
 import static org.neo4j.driver.Values.parameters;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * Plugin's main class.
  */
 public class DigitalTwinPluginDelegate implements IPluginActionDelegate {

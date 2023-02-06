@@ -12,7 +12,7 @@ import services.Service;
 import java.util.ArrayList;
 
 /**
- * @author Juan Alberto Llopis - University of Almería
+ * @author -
  * InputManager that retrieves all Illumination objects in the data lake and converts them to USE objects.
  */
 public class IlluminationManager extends InputManager {

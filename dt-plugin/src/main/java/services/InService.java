@@ -11,7 +11,7 @@ import utils.DTLogger;
 import java.util.List;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * Class for a thread that generates ("publishes") events whenever new information appears in the
  * Data Lake.
  */

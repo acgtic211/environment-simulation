@@ -10,7 +10,7 @@ import utils.DTLogger;
 import java.util.List;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * Class for a thread that generates ("publishes") events whenever new output snapshot or command objects appear.
  */
 public class OutService extends Service {

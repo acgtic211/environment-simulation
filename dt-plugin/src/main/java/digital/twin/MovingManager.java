@@ -12,7 +12,7 @@ import services.Service;
 import java.util.ArrayList;
 
 /**
- * @author Juan Alberto Llopis - University of Almería
+ * @author -
  * InputManager that retrieves all MovingObjects in the data lake and converts them to USE objects.
  */
 public class MovingManager extends InputManager {

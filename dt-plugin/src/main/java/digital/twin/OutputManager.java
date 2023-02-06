@@ -10,7 +10,7 @@ import java.util.*;
 import static org.neo4j.driver.Values.parameters;
 
 /**
- * @author Paula Muñoz, Daniel Pérez - University of Málaga
+ * @author -
  * Class that retrieves all instances of a USE model class and serializes them for storage in the data lake.
  */
 public abstract class OutputManager {

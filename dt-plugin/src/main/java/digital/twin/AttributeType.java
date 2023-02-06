@@ -1,7 +1,7 @@
 package digital.twin;
 
 /**
- * @author Daniel Pérez - University of Málaga
+ * @author -
  * Types of each attribute in an AttributeSpecification.
  */
 public enum AttributeType {
