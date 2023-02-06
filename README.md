@@ -43,7 +43,7 @@ Finally, the button *Start connection with the Digital Twin* executes the driver
 
 The SOIL file located in the folder [replicating-scenario](replicating-scenario/Scenario.soil) replicates the evaluation scenario of the paper. The recommendation is to execute step-by-step copying the code inside each step in the command prompt of the USE program. In steps where multiple ticks from the clock have to be executed, for example, in step 1, the recommendation is to execute the ticks in batches of 15-30 elements to avoid errors in the USE program.
 
-Finally, for researchers that do not have PTs deployed, some steps include commands for the DL to simulate the functionality of the driver that connects the PTs and the DL. For instance, step 2 has commands to simulate the presence of worker1 and the interaction of worker1 with the light bulbs of office 2.15.
+Finally, for researchers that do not have PTs deployed, some steps include commands for the DL to simulate the functionality of the driver that connects the PTs and the DL. For instance, step 2 has commands to simulate the presence of worker1 and the interaction of worker1 with the light bulbs of office 2.15. In the case of having PTs deployed, the next section links the driver used for the connection between the PT and the DL.
 
 # Additional code
 
